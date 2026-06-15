@@ -1,34 +1,47 @@
 # 🎬 StreamVibe
 
-StreamVibe is a modern web application built with Spring Boot that provides a platform for browsing movies and TV shows. The project is designed with a clean architecture and scalable backend structure.
+StreamVibe is a Spring Boot web application for browsing and managing movies and TV shows.
 
 ---
 
 ## 🚀 Features
-
-- 🎥 Movie and TV show management
-- 📂 Category-based content structure
+- 🎥 Movies & TV shows management
+- 📂 Category system
 - 🔍 Search functionality
-- 📄 Detailed movie/show pages
-- 🗄️ Relational database design
-- ⚙️ RESTful API architecture
-- 🧩 Scalable Spring Boot backend
+- 📄 Detail pages
+- ⚙️ RESTful architecture
+- 🗄️ MySQL database integration
 
 ---
 
 ## 🛠️ Tech Stack
-
-- Java 17+
+- Java 17
 - Spring Boot
+- Spring MVC
 - Spring Data JPA
 - Hibernate
 - Maven
-- MySQL / PostgreSQL (depending on configuration)
-- Thymeleaf (if frontend included)
+- MySQL
+- Thymeleaf (optional)
 
 ---
 
-## 📁 Project Structure
+## 📁 Structure
+- controller/
+- service/
+- repository/
+- model/
+- dto/
+- exception/
+- config/
+
+---
+
+## ▶️ Run Project
+```bash id="p8k2ld"
+
+---
+
 ## Author
 Name: Selcan Agabalayeva
 

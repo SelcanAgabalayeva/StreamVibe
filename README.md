@@ -52,5 +52,7 @@ PostgreSql running locally or remote
 ## 👤 Author
 
 Name: Selcan Agabalayeva
+
 GitHub: https://github.com/SelcanAgabalayeva
+
 LinkedIn: https://www.linkedin.com/in/selcan-a%C4%9Fabalayeva/

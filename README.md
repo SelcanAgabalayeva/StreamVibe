@@ -5,6 +5,7 @@ StreamVibe is a Spring Boot web application for browsing and managing movies and
 ---
 
 ## 🚀 Features
+
 - 🎥 Movies & TV shows management
 - 📂 Category system
 - 🔍 Search functionality
@@ -15,6 +16,7 @@ StreamVibe is a Spring Boot web application for browsing and managing movies and
 ---
 
 ## 🛠️ Tech Stack
+
 - Java 17
 - Spring Boot
 - Spring MVC
@@ -26,25 +28,29 @@ StreamVibe is a Spring Boot web application for browsing and managing movies and
 
 ---
 
-## 📁 Structure
-- controller/
-- service/
-- repository/
-- model/
-- dto/
-- exception/
-- config/
+## 📁 Project Structure
 
----
 
-## ▶️ Run Project
-```bash id="p8k2ld"
+controller/
+service/
+repository/
+model/
+dto/
+exception/
+config/
 
----
 
-## Author
+# Enter project folder
+cd streamvibe
+
+# Run with Maven
+mvn spring-boot:run
+⚙️ Requirements
+Java 17+
+Maven 3+
+PostgreSql running locally or remote
+## 👤 Author
+
 Name: Selcan Agabalayeva
-
 GitHub: https://github.com/SelcanAgabalayeva
-
 LinkedIn: https://www.linkedin.com/in/selcan-a%C4%9Fabalayeva/

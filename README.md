@@ -29,3 +29,9 @@ StreamVibe is a modern web application built with Spring Boot that provides a pl
 ---
 
 ## 📁 Project Structure
+## Author
+Name: Selcan Agabalayeva
+
+GitHub: https://github.com/SelcanAgabalayeva
+
+LinkedIn: https://www.linkedin.com/in/selcan-a%C4%9Fabalayeva/

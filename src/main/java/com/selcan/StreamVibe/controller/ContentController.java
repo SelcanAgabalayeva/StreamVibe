@@ -1,16 +1,10 @@
 package com.selcan.StreamVibe.controller;
 
-import com.selcan.StreamVibe.dto.ContentCardResponseDto;
-import com.selcan.StreamVibe.dto.GenreDto;
-import com.selcan.StreamVibe.dto.HeroResponseDto;
-import com.selcan.StreamVibe.dto.TopTenResponseDto;
+import com.selcan.StreamVibe.dto.*;
 import com.selcan.StreamVibe.service.ContentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -56,6 +50,33 @@ public class ContentController {
                         filter,
                         limit
                 )
+        );
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ContentDetailResponseDto> getContentDetail(
+            @PathVariable Integer id) {
+
+        return ResponseEntity.ok(
+                contentService.getContentDetail(id)
+        );
+    }
+    @GetMapping("/{id}/seasons")
+    public ResponseEntity<List<SeasonResponseDto>> getSeasons(
+            @PathVariable Integer id) {
+
+        return ResponseEntity.ok(
+                contentService.getSeasons(id)
+        );
+    }
+    @GetMapping("/{id}/reviews")
+    public ResponseEntity<List<ReviewResponseDto>> getReviews(
+            @PathVariable Integer id) {
+
+
+        return ResponseEntity.ok(
+                contentService.getReviews(id)
         );
     }
 }

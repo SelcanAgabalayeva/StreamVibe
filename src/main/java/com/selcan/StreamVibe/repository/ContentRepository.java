@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ContentRepository extends JpaRepository<Content, Long> {
+public interface ContentRepository extends JpaRepository<Content, Integer> {
 
     List<Content> findByIsFeaturedTrue();
     Page<Content> findByTypeAndIsTrendingTrue(

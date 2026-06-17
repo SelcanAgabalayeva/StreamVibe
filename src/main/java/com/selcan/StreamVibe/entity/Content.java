@@ -6,6 +6,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "content")
@@ -57,4 +59,11 @@ public class Content {
     private Integer topTenRank;
 
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    private List<ContentGenre> genres = new ArrayList<>();
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    private List<ContentLanguage> languages = new ArrayList<>();
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    private List<ContentPerson> people = new ArrayList<>();
 }

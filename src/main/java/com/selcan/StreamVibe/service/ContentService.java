@@ -1,9 +1,6 @@
 package com.selcan.StreamVibe.service;
 
-import com.selcan.StreamVibe.dto.ContentCardResponseDto;
-import com.selcan.StreamVibe.dto.GenreDto;
-import com.selcan.StreamVibe.dto.HeroResponseDto;
-import com.selcan.StreamVibe.dto.TopTenResponseDto;
+import com.selcan.StreamVibe.dto.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.List;
@@ -14,4 +11,10 @@ public interface ContentService {
     List<GenreDto> getGenres(String type);
     List<TopTenResponseDto> getTopTen(String type);
     List<ContentCardResponseDto> getContents(String type, String filter, Integer limit);
+
+    ContentDetailResponseDto getContentDetail(Integer id);
+
+    List<SeasonResponseDto> getSeasons(Integer contentId);
+    List<ReviewResponseDto> getReviews(Integer id);
+
 }

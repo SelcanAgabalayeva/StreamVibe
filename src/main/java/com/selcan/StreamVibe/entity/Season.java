@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "seasons")
 @Getter
@@ -23,4 +26,6 @@ public class Season {
     private Integer episodeCount;
 
     private String title;
+    @OneToMany(mappedBy = "season", fetch = FetchType.LAZY)
+    private List<Episode> episodes = new ArrayList<>();
 }

@@ -2,6 +2,7 @@ package com.selcan.StreamVibe.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -19,5 +20,15 @@ public class GlobalExceptionHandler {
                         "error", "Not Found",
                         "message", ex.getMessage()
                 ));
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> validation(MethodArgumentNotValidException ex) {
+
+        String message = ex.getBindingResult()
+                .getFieldError()
+                .getDefaultMessage();
+
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", message));
     }
 }

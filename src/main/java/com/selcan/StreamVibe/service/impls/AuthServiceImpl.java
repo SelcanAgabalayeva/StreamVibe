@@ -1,0 +1,287 @@
+package com.selcan.StreamVibe.service.impls;
+
+import com.selcan.StreamVibe.dto.*;
+import com.selcan.StreamVibe.entity.RefreshToken;
+import com.selcan.StreamVibe.entity.User;
+import com.selcan.StreamVibe.exception.ConflictException;
+import com.selcan.StreamVibe.exception.ForbiddenException;
+import com.selcan.StreamVibe.exception.UnauthorizedException;
+import com.selcan.StreamVibe.repository.RefreshTokenRepository;
+import com.selcan.StreamVibe.repository.UserRepository;
+import com.selcan.StreamVibe.security.JwtService;
+import com.selcan.StreamVibe.service.AuthService;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Base64;
+
+@Service
+@RequiredArgsConstructor
+
+public class AuthServiceImpl implements AuthService {
+
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
+    private final JwtService jwtService;
+
+    @Override
+    public AuthResponseDto register(RegisterRequestDto request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException(
+                    "Email already in use"
+            );
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ConflictException(
+                    "Username already taken"
+            );
+        }
+
+        User user = new User();
+
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+
+        user.setPasswordHash(
+                passwordEncoder.encode(
+                        request.getPassword()
+                )
+        );
+
+        user.setIsActive(true);
+
+        user = userRepository.save(user);
+
+        String accessToken =
+                jwtService.generateToken(user);
+
+        String refreshToken =
+                generateRefreshToken();
+
+        RefreshToken token =
+                RefreshToken.builder()
+                        .user(user)
+                        .token(refreshToken)
+                        .expiresAt(
+                                LocalDateTime.now()
+                                        .plusDays(7)
+                        )
+                        .createdAt(
+                                LocalDateTime.now()
+                        )
+                        .build();
+
+        refreshTokenRepository.save(token);
+
+        UserResponseDto userDto =
+                modelMapper.map(
+                        user,
+                        UserResponseDto.class
+                );
+
+        return AuthResponseDto.builder()
+                .success(true)
+                .message("Registration successful")
+                .user(userDto)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(900)
+                .build();
+    }
+    @Transactional
+    @Override
+    public AuthResponseDto login(LoginRequestDto request) {
+
+        User user = userRepository.findByEmail(
+                request.getEmail()
+        ).orElseThrow(
+                () -> new UnauthorizedException(
+                        "Invalid email or password"
+                )
+        );
+
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPasswordHash()
+        )) {
+            throw new UnauthorizedException(
+                    "Invalid email or password"
+            );
+        }
+
+        if (!Boolean.TRUE.equals(user.getIsActive())) {
+            throw new ForbiddenException(
+                    "Account is deactivated"
+            );
+        }
+
+        refreshTokenRepository.deleteByUser(user);
+
+        String accessToken =
+                jwtService.generateToken(user);
+
+        String refreshToken =
+                generateRefreshToken();
+
+        RefreshToken token =
+                RefreshToken.builder()
+                        .user(user)
+                        .token(refreshToken)
+                        .expiresAt(
+                                LocalDateTime.now()
+                                        .plusDays(7)
+                        )
+                        .createdAt(
+                                LocalDateTime.now()
+                        )
+                        .build();
+
+        refreshTokenRepository.save(token);
+
+        UserResponseDto userDto =
+                modelMapper.map(
+                        user,
+                        UserResponseDto.class
+                );
+
+        return AuthResponseDto.builder()
+                .success(true)
+                .message("Login successful")
+                .user(userDto)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(900)
+                .build();
+    }
+
+
+
+    @Transactional(noRollbackFor = UnauthorizedException.class)
+    @Override
+    public AuthResponseDto refreshToken(
+            RefreshTokenRequestDto request
+    ) {
+
+        RefreshToken oldToken =
+                refreshTokenRepository
+                        .findByToken(request.getRefreshToken())
+                        .orElseThrow(() ->
+                                new UnauthorizedException(
+                                        "Invalid refresh token"
+                                )
+                        );
+
+
+        if (oldToken.getExpiresAt()
+                .isBefore(LocalDateTime.now())) {
+
+
+            refreshTokenRepository.deleteByToken(
+                    oldToken.getToken()
+            );
+
+            refreshTokenRepository.flush();
+
+
+            throw new UnauthorizedException(
+                    "Refresh token expired"
+            );
+        }
+
+
+        User user = oldToken.getUser();
+
+
+        String accessToken =
+                jwtService.generateToken(user);
+
+
+        refreshTokenRepository.deleteByToken(
+                oldToken.getToken()
+        );
+
+
+        String newRefreshToken =
+                generateRefreshToken();
+
+
+        RefreshToken token =
+                RefreshToken.builder()
+                        .user(user)
+                        .token(newRefreshToken)
+                        .createdAt(LocalDateTime.now())
+                        .expiresAt(
+                                LocalDateTime.now()
+                                        .plusDays(7)
+                        )
+                        .build();
+
+
+        refreshTokenRepository.save(token);
+
+
+        UserResponseDto userDto =
+                modelMapper.map(
+                        user,
+                        UserResponseDto.class
+                );
+
+
+        return AuthResponseDto.builder()
+                .success(true)
+                .message("Token refreshed successfully")
+                .user(userDto)
+                .accessToken(accessToken)
+                .refreshToken(newRefreshToken)
+                .expiresIn(900)
+                .build();
+    }
+    @Transactional
+    @Override
+    public void logout(
+            RefreshTokenRequestDto request
+    ) {
+
+        refreshTokenRepository
+                .findByToken(request.getRefreshToken())
+                .ifPresent(refreshTokenRepository::delete);
+    }
+    @Override
+    public UserResponseDto me() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        User user =
+                (User) authentication.getPrincipal();
+
+        return modelMapper.map(
+                user,
+                UserResponseDto.class
+        );
+    }
+
+    private String generateRefreshToken() {
+
+        byte[] bytes = new byte[64];
+
+        new SecureRandom().nextBytes(bytes);
+
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(bytes);
+    }
+}

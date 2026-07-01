@@ -1,7 +1,10 @@
 package com.selcan.StreamVibe.service.impls;
 
 import com.selcan.StreamVibe.dto.ApiResponse;
+import com.selcan.StreamVibe.dto.FeatureResponseDto;
 import com.selcan.StreamVibe.dto.PlanDto;
+import com.selcan.StreamVibe.enums.BillingCycle;
+import com.selcan.StreamVibe.repository.PlanFeatureRepository;
 import com.selcan.StreamVibe.repository.PricingPlanRepository;
 import com.selcan.StreamVibe.service.PlanService;
 import lombok.RequiredArgsConstructor;
@@ -16,29 +19,86 @@ public class PlanServiceImpl implements PlanService {
 
     private final PricingPlanRepository pricingPlanRepository;
     private final ModelMapper modelMapper;
+    private final PlanFeatureRepository planFeatureRepository;
 
     @Override
     public ApiResponse<List<PlanDto>> getPlans(String billing) {
 
-        List<PlanDto> data = pricingPlanRepository.findAll()
-                .stream()
-                .map(plan -> {
-                    PlanDto dto = new PlanDto();
 
-                    dto.setId(plan.getId());
-                    dto.setName(plan.getName());
-                    dto.setDescription(plan.getDescription());
-                    dto.setIsPopular(plan.getIsPopular());
+        BillingCycle billingCycle =
+                "yearly".equalsIgnoreCase(billing)
+                        ? BillingCycle.YEARLY
+                        : BillingCycle.MONTHLY;
 
-                    dto.setPrice(
-                            "yearly".equalsIgnoreCase(billing)
-                                    ? plan.getPriceYearly()
-                                    : plan.getPriceMonthly()
-                    );
 
-                    return dto;
-                })
-                .toList();
+
+        List<PlanDto> data =
+                pricingPlanRepository.findAll()
+                        .stream()
+                        .map(plan -> {
+
+                            PlanDto dto = new PlanDto();
+
+                            dto.setId(plan.getId());
+                            dto.setName(plan.getName());
+                            dto.setDescription(plan.getDescription());
+
+                            dto.setIsPopular(
+                                    plan.getIsPopular()
+                            );
+
+
+                            dto.setBillingCycle(
+                                    billingCycle
+                            );
+
+
+                            dto.setPrice(
+                                    billingCycle == BillingCycle.YEARLY
+                                            ? plan.getPriceYearly()
+                                            : plan.getPriceMonthly()
+                            );
+
+
+                            List<FeatureResponseDto> features =
+                                    planFeatureRepository
+                                            .findByPlanIdOrderByOrderNumber(
+                                                    plan.getId()
+                                            )
+                                            .stream()
+                                            .map(feature -> {
+
+                                                FeatureResponseDto featureDto =
+                                                        new FeatureResponseDto();
+
+                                                featureDto.setFeatureName(
+                                                        feature.getFeatureName()
+                                                );
+
+                                                featureDto.setFeatureValue(
+                                                        feature.getFeatureValue()
+                                                );
+
+                                                featureDto.setOrderNumber(
+                                                        feature.getOrderNumber()
+                                                );
+
+                                                return featureDto;
+
+                                            })
+                                            .toList();
+
+
+
+                            dto.setFeatures(features);
+
+
+                            return dto;
+
+                        })
+                        .toList();
+
+
 
         return ApiResponse.<List<PlanDto>>builder()
                 .success(true)

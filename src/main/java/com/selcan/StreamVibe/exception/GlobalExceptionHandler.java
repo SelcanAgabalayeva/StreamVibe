@@ -1,5 +1,6 @@
 package com.selcan.StreamVibe.exception;
 
+import com.selcan.StreamVibe.dto.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -31,4 +32,45 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest()
                 .body(Map.of("message", message));
     }
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<?> handleConflict(
+            ConflictException ex
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(
+                        Map.of(
+                                "message",
+                                ex.getMessage()
+                        )
+                );
+    }
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponseDto> handleUnauthorized(
+            UnauthorizedException ex
+    ) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(
+                        ErrorResponseDto.builder()
+                                .status(401)
+                                .message(ex.getMessage())
+                                .build()
+                );
+    }
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponseDto> handleForbidden(
+            ForbiddenException ex
+    ) {
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(
+                        ErrorResponseDto.builder()
+                                .status(403)
+                                .message(ex.getMessage())
+                                .build()
+                );
+    }
+
 }
